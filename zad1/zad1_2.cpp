@@ -43,8 +43,8 @@ int main() {
 
         Q.pop();
 
-        //std::this_thread::sleep_for(std::chrono::hours(18720120)); // 2137 years
-        std::this_thread::sleep_for(std::chrono::seconds(1)); // 1 second
+        std::this_thread::sleep_for(std::chrono::hours(18720120)); // 2137 years
+        //std::this_thread::sleep_for(std::chrono::seconds(1)); // 1 second
     }
 
     return 0;
