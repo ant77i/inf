@@ -1,62 +1,81 @@
 #include <iostream>
 #include <fstream>
 #include <climits>
+#include <vector>
+#include <queue>
 
 using namespace std;
 
 int N = 9;
 
-int main() {
-	ifstream file("data.txt", ios::in);
+bool dfs(int i, vector<bool> &visited, vector<vector<int>> &graph, int parent) {
+	visited[i] = true;
 
-	/* int graph[N][N] = { { 0, 5, INT_MAX, 10 },
-                        { INT_MAX, 0, 3, INT_MAX },
-                        { INT_MAX, INT_MAX, 0, 1 },
-                        { INT_MAX, INT_MAX, INT_MAX, 0 } }; */
-
-	int graph[N][N] = {0};
-
-	/*
-		Trochę nie rozumiem tej tablicy którą nam Pan dał,
-		,ponieważ z tego co ja rozumiem to wartość w tablicy na indeksie [i][j] oznacza że
-		długość odcinka z punktu i do punktu j to tablica[i][j],
-		a to by oznaczało że ta tablica wejściowa jest odpowiedzią.
-		Próbowałem się dowiedzieć od reszty grupy, ale dalej nie rozumiem,
-		więc przesyłam Panu moją implementacje Floyd-Warshall'a w c++
-	*/
-
-	
-	for (int i = 0; i < N; i++) {
-		for (int j = 0; j < N; j++) {
-			string input = "";
-			file >> input;
-
-			if (input == "INF") graph[i][j] = INT_MAX;
-			else graph[i][j] = stoi(input);
-		}
+	for (const int& j : graph[i]) {
+		if (!visited[j]) {
+			if (dfs(j, visited, graph, i)) return true;
+		} else if (j != parent) return true;
 	}
-	
 
-	int i, j, k;
+	return false;
+}
 
-	for (k = 0; k < N; k++) {
-		for (i = 0; i < N; i++) {
-			for (j = 0; j < N; j++) {
-				if (graph[i][j] > (graph[i][k] + graph[k][j])
-				 && graph[k][j] != INT_MAX
-				 && graph[i][k] != INT_MAX) {
+bool czyDrzewo(vector<vector<int>> &graph) {
+	vector<bool> visited(N, false);
 
-					graph[i][j] = graph[i][k] + graph[k][j];
-				}
+	for (int i = 0; i < N; i++) {
+		if (dfs(0, visited, graph, -1)) return false;
+	}
+
+	for (int i = 0; i < N; i++) {
+		if (!visited[i]) return false;
+	}
+
+	return true;
+}
+
+void dijkstra(int i, vector<vector<int>> &graph) {
+	priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pQ;
+
+	vector<int> dist(N, INT_MAX);
+
+	pQ.push({0, i});
+	dist[i] = 0;
+
+	while (!pQ.empty()) {
+		int u = pQ.top().second;
+		pQ.pop();
+
+		for (const int& v : graph[u]) {
+			int weight = abs(v - u);
+
+			if (dist[v] > dist[u] + weight) {
+				dist[v] = dist[u] + weight;
+				pQ.push({dist[v], v});
 			}
 		}
 	}
 
+	cout << "Odległości od punktu"
+}
+
+int main() {
+	ifstream file("data.txt", ios::in);
+
+	vector<vector<int>> graph(N, vector<int>(N, 0));
+	
 	for (int i = 0; i < N; i++) {
 		for (int j = 0; j < N; j++) {
-			if (graph[i][j] == INT_MAX) cout << "INF" << ' ';
-			else cout << graph[i][j] << "   ";
+			cin >> graph[i][j];
 		}
-		cout << '\n';
+	}
+
+	if (!czyDrzewo(graph)) {
+		cout << "Ten graf to nie drzewo.\n";
+		return 0;
+	}
+
+	for (int i = 0; i < N; i++) {
+		dijsktra(i);
 	}
 }
