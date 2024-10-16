@@ -8,13 +8,13 @@ using namespace std;
 
 int N = 9;
 
-bool dfs(int i, vector<bool> &visited, vector<vector<int>> &graph, int parent) {
-	visited[i] = true;
+bool dfs(int u, vector<bool> &visited, vector<vector<int>> &graph, int parent) {
+	visited[u] = true;
 
-	for (const int& j : graph[i]) {
-		if (!visited[j]) {
-			if (dfs(j, visited, graph, i)) return true;
-		} else if (j != parent) return true;
+	for (const int& v : graph[u]) {
+		if (!visited[v]) {
+			if (dfs(v, visited, graph, u)) return true;
+		} else if (v != parent) return true;
 	}
 
 	return false;
@@ -23,9 +23,9 @@ bool dfs(int i, vector<bool> &visited, vector<vector<int>> &graph, int parent) {
 bool czyDrzewo(vector<vector<int>> &graph) {
 	vector<bool> visited(N, false);
 
-	for (int i = 0; i < N; i++) {
-		if (dfs(0, visited, graph, -1)) return false;
-	}
+
+	if (dfs(0, visited, graph, -1)) return false;
+	
 
 	for (int i = 0; i < N; i++) {
 		if (!visited[i]) return false;
@@ -34,13 +34,13 @@ bool czyDrzewo(vector<vector<int>> &graph) {
 	return true;
 }
 
-void dijkstra(int i, vector<vector<int>> &graph) {
+void dijkstra(int source, vector<vector<int>> &graph) {
 	priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pQ;
 
 	vector<int> dist(N, INT_MAX);
 
-	pQ.push({0, i});
-	dist[i] = 0;
+	pQ.push({0, source});
+	dist[source] = 0;
 
 	while (!pQ.empty()) {
 		int u = pQ.top().second;
@@ -56,7 +56,9 @@ void dijkstra(int i, vector<vector<int>> &graph) {
 		}
 	}
 
-	cout << "Odległości od punktu"
+	cout << "Odległości od punktu " << source << "do: ";
+	for (int i = 0; i < N; i++) cout << "\tPunktu " << i << " = " << dist[i] << '\n';
+	cout << '\n';
 }
 
 int main() {
@@ -66,7 +68,7 @@ int main() {
 	
 	for (int i = 0; i < N; i++) {
 		for (int j = 0; j < N; j++) {
-			cin >> graph[i][j];
+			file >> graph[i][j];
 		}
 	}
 
@@ -76,6 +78,8 @@ int main() {
 	}
 
 	for (int i = 0; i < N; i++) {
-		dijsktra(i);
+		dijkstra(i, graph);
 	}
+
+	return 0;
 }
