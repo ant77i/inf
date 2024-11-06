@@ -8,14 +8,14 @@ FROM Sales.Customer AS C
 	ON C.PersonID = BEC.PersonID
 	JOIN Person.Person AS P
 	ON BEC.BusinessEntityID = P.BusinessEntityID
--- BEC i P nie maj¹ elementów wspólnych
+-- BEC i P nie maja elementow wspolnych
 
 -- zad. 2
 SELECT 
 	P.Name,
-	COUNT(SOD.ProductID) AS 'Liczba zamówieñ',
-	SUM(SOD.OrderQty) AS 'Iloœæ sprzedanych sztuk',
-	SUM(SOD.LineTotal) AS '£¹czna wartoœæ sprzeda¿y'
+	COUNT(SOD.ProductID) AS 'Liczba zamowien',
+	SUM(SOD.OrderQty) AS 'Ilosc sprzedanych sztuk',
+	SUM(SOD.LineTotal) AS 'Laczna wartosc sprzedazy'
 FROM Sales.SalesOrderDetail AS SOD
 	JOIN Production.Product AS P
 	ON SOD.ProductID = P.ProductID
@@ -27,8 +27,8 @@ ORDER BY COUNT(SOD.ProductID) DESC
 SELECT
 	P.Name,
 	ST.Name,
-	SUM(SOD.LineTotal) AS '£¹czna sprzeda¿ dla produktu',
-	AVG(SOD.OrderQty) AS 'Œrednia iloœæ sprzedanych sztuk'
+	SUM(SOD.LineTotal) AS 'Laczna sprzedaz dla produktu',
+	AVG(SOD.OrderQty) AS 'Srednia ilosc sprzedanych sztuk'
 FROM Production.Product AS P
 	JOIN Sales.SalesOrderDetail AS SOD
 	ON P.ProductID = SOD.ProductID
@@ -43,3 +43,13 @@ ORDER BY ST.Name
 -- zad. 4
 SELECT
 	*
+FROM Sales.SalesPerson AS SP
+	JOIN Person.Person AS P
+	ON SP.BusinessEntityID = P.BusinessEntityID
+	JOIN Sales.PersonCreditCard AS PCC
+	ON P.BusinessEntityID = PCC.BusinessEntityID
+	JOIN Sales.SalesOrderHeader AS SOH
+	ON SOH.CreditCardID = PCC.CreditCardID
+--WHERE SOH.OrderDate > '2022-01-01'
+--GROUP BY P.FirstName, P.LastName
+--
