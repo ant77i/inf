@@ -1,4 +1,4 @@
--- zad. 1
+-- zad. 1 pusty wynik
 SELECT
 	*
 FROM Sales.Customer AS C
@@ -8,7 +8,7 @@ FROM Sales.Customer AS C
 	ON C.PersonID = BEC.PersonID
 	JOIN Person.Person AS P
 	ON BEC.BusinessEntityID = P.BusinessEntityID
--- BEC i P nie maja elementow wspolnych
+-- 
 
 -- zad. 2
 SELECT 
@@ -40,7 +40,7 @@ GROUP BY P.Name, ST.Name
 ORDER BY ST.Name
 --
 
--- zad. 4
+-- zad. 4 pusty wynik
 SELECT
 	P.FirstName,
 	P.LastName,
@@ -85,7 +85,7 @@ FROM Production.Product as P
 GROUP BY P.Name
 --
 
--- zad. 7
+-- zad. 7 niedokonczone
 SELECT
 	P.Name,
 	DATEPART(year, SOH.OrderDate) as Rok,
@@ -115,7 +115,62 @@ ORDER BY P.Name, V.Name
 
 -- zad. 9
 SELECT
-	*
+	CC.CardType,
+	COUNT(*) AS 'Liczba zamowien',
+	SUM(SOH.TotalDue) AS 'Laczna wartosc sprzedazy'
 FROM Sales.SalesOrderHeader as SOH
 	JOIN Sales.CreditCard as CC
 	ON SOH.CreditCardID = CC.CreditCardID
+GROUP BY CC.CardType
+ORDER BY CC.CardType ASC
+--
+
+-- zad. 10
+SELECT
+	P.Name,
+	P.Class
+FROM Production.Product AS P
+WHERE P.ProductID NOT IN (
+	SELECT SOD.ProductID
+	FROM Sales.SalesOrderDetail AS SOD
+)
+ORDER BY P.Name
+--
+
+-- zad. 11
+SELECT
+	ST.Name,
+	AVG(DATEDIFF(day, SOH.OrderDate, SOH.ShipDate)) AS 'Sredni czas realizacji zamowienia'
+FROM Sales.SalesOrderHeader AS SOH
+	JOIN Sales.SalesTerritory AS ST
+	ON SOH.TerritoryID = ST.TerritoryID
+GROUP BY ST.Name
+ORDER BY ST.Name
+--
+
+-- zad. 12
+SELECT 
+	P.Name,
+	MAX(SOD.UnitPrice) * 100.0 / MIN(SOD.UnitPrice)
+FROM Sales.SalesOrderDetail AS SOD
+	JOIN Production.Product AS P
+	ON SOD.ProductID = P.ProductID
+GROUP BY P.Name
+ORDER BY MAX(SOD.UnitPrice) * 100.0 / MIN(SOD.UnitPrice) DESC
+--
+
+-- zad. 13
+SELECT
+	P.Name,
+	AVG(DATEDIFF(day, POH.OrderDate, SOH.ShipDate)) AS 'Srednia ilosc dni od zakupu od dowstawcy do sprzedazy klientowi'
+FROM Production.Product AS P
+	JOIN Purchasing.PurchaseOrderDetail AS POD
+	ON POD.ProductID = P.ProductID
+	JOIN Purchasing.PurchaseOrderHeader AS POH
+	ON POH.PurchaseOrderID = POD.PurchaseOrderID
+	JOIN Sales.SalesOrderDetail AS SOD
+	ON SOD.ProductID = P.ProductID
+	JOIN Sales.SalesOrderHeader AS SOH
+	ON SOH.SalesOrderID = SOD.SalesOrderID
+GROUP BY P.Name
+ORDER BY P.Name
