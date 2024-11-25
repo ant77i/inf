@@ -1,34 +1,44 @@
--- zad. 1 pusty wynik
+-- https://dataedo.com/samples/html/AdventureWorks/doc/AdventureWorks_2/modules/Purchasing_11/module.html
+-- ta strona ratuje życie 
+-- !!!
+
+
+-- zad. 1
 SELECT
-	*
-FROM Sales.Customer AS C
-	JOIN Sales.SalesOrderHeader AS SOH
+	P.FirstName,
+	P.LastName,
+	COUNT(*) AS 'Liczba zamówień',
+	SUM(SOH.TotalDue) AS 'Łączna kwota zakupów'
+FROM Sales.SalesOrderHeader AS SOH
+	JOIN Sales.Customer AS C
 	ON SOH.CustomerID = C.CustomerID
-	JOIN Person.BusinessEntityContact AS BEC
-	ON C.PersonID = BEC.PersonID
 	JOIN Person.Person AS P
-	ON BEC.BusinessEntityID = P.BusinessEntityID
--- 
+	ON C.PersonID = P.BusinessEntityID
+WHERE YEAR(SOH.OrderDate) >= YEAR(GETDATE()) - 1
+GROUP BY P.FirstName, P.LastName
+ORDER BY COUNT(*) DESC
+-- pusty wynik bo najnowsza data w tabeli to 2014 rok
+-- https://dataedo.com/samples/html/AdventureWorks/doc/AdventureWorks_2/modules/Business_Entities_82/module.html
 
 -- zad. 2
 SELECT 
 	P.Name,
-	COUNT(SOD.ProductID) AS 'Liczba zamowien',
-	SUM(SOD.OrderQty) AS 'Ilosc sprzedanych sztuk',
-	SUM(SOD.LineTotal) AS 'Laczna wartosc sprzedazy'
+	COUNT(*) AS 'Liczba zamówień',
+	SUM(SOD.OrderQty) AS 'Ilość sprzedanych sztuk',
+	SUM(SOD.LineTotal) AS 'Łączna wartość sprzedaży'
 FROM Sales.SalesOrderDetail AS SOD
 	JOIN Production.Product AS P
 	ON SOD.ProductID = P.ProductID
 GROUP BY P.Name
-ORDER BY COUNT(SOD.ProductID) DESC
+ORDER BY COUNT(*) DESC
 --
 
 -- zad. 3
 SELECT
-	P.Name,
 	ST.Name,
-	SUM(SOD.LineTotal) AS 'Laczna sprzedaz dla produktu',
-	AVG(SOD.OrderQty) AS 'Srednia ilosc sprzedanych sztuk'
+	P.Name,
+	SUM(SOD.LineTotal) AS 'Łączna sprzedaż',
+	AVG(SOD.OrderQty) AS 'Średnia ilość sprzedanych sztuk na jedno zamówienie'
 FROM Production.Product AS P
 	JOIN Sales.SalesOrderDetail AS SOD
 	ON P.ProductID = SOD.ProductID
@@ -36,25 +46,24 @@ FROM Production.Product AS P
 	ON SOD.SalesOrderID = SOH.SalesOrderID
 	JOIN Sales.SalesTerritory AS ST
 	ON SOH.TerritoryID = ST.TerritoryID
-GROUP BY P.Name, ST.Name
-ORDER BY ST.Name
+GROUP BY ST.Name, P.Name
+ORDER BY ST.Name, P.Name
 --
 
--- zad. 4 pusty wynik
+-- zad. 4 
 SELECT
 	P.FirstName,
 	P.LastName,
+	--YEAR(SOH.OrderDate)
 	AVG(SOH.TotalDue)
 FROM Sales.SalesPerson AS SP
 	JOIN Person.Person AS P
 	ON SP.BusinessEntityID = P.BusinessEntityID
-	JOIN Sales.PersonCreditCard AS PCC
-	ON P.BusinessEntityID = PCC.BusinessEntityID
 	JOIN Sales.SalesOrderHeader AS SOH
-	ON SOH.CreditCardID = PCC.CreditCardID
-WHERE SOH.OrderDate > '2022-01-01'
+	ON SP.BusinessEntityID = SOH.SalesPersonID
+WHERE YEAR(SOH.OrderDate) >= 2022
 GROUP BY P.FirstName, P.LastName
---
+-- wynik pusty ponieważ najnowsza data w tableli to 2014 rok
 
 -- zad. 5
 SELECT 
@@ -69,7 +78,7 @@ FROM Purchasing.Vendor as V
 	JOIN Production.ProductInventory AS PI
 	ON PV.ProductID = PI.ProductID
 GROUP BY V.Name, P.Name
-ORDER BY V.Name DESC
+ORDER BY V.Name, P.Name ASC
 --
 
 -- zad. 6
@@ -83,7 +92,9 @@ FROM Production.Product as P
 	JOIN Sales.SalesOrderHeader AS SOH
 	ON SOD.SalesOrderID = SOH.SalesOrderID
 GROUP BY P.Name
---
+-- albo nikt nie zwraca 
+-- albo flaga "czy zamównienie jest zwrócone" jest przechowywana w innym miejscu
+-- ¯\_(:P)_/¯
 
 -- zad. 7 na dwa sposoby 
 SELECT
@@ -156,8 +167,8 @@ ORDER BY P.Name, V.Name
 -- zad. 9
 SELECT
 	CC.CardType,
-	COUNT(*) AS 'Liczba zamowien',
-	SUM(SOH.TotalDue) AS 'Laczna wartosc sprzedazy'
+	COUNT(*) AS 'Liczba zamowień',
+	SUM(SOH.TotalDue) AS 'Łączna wartość sprzedaży'
 FROM Sales.SalesOrderHeader as SOH
 	JOIN Sales.CreditCard as CC
 	ON SOH.CreditCardID = CC.CreditCardID
@@ -180,7 +191,7 @@ ORDER BY P.Name
 -- zad. 11
 SELECT
 	ST.Name,
-	AVG(DATEDIFF(day, SOH.OrderDate, SOH.ShipDate)) AS 'Sredni czas realizacji zamowienia'
+	AVG(DATEDIFF(day, SOH.OrderDate, SOH.ShipDate)) AS 'Średni czas realizacji zamówienia'
 FROM Sales.SalesOrderHeader AS SOH
 	JOIN Sales.SalesTerritory AS ST
 	ON SOH.TerritoryID = ST.TerritoryID
@@ -191,12 +202,12 @@ ORDER BY ST.Name
 -- zad. 12
 SELECT 
 	P.Name,
-	MAX(SOD.UnitPrice) * 100.0 / MIN(SOD.UnitPrice)
+	(MAX(SOD.UnitPrice) - MIN(SOD.UnitPrice)) * 100.0 / MIN(SOD.UnitPrice) AS 'Przyrost ceny sprzedaży'
 FROM Sales.SalesOrderDetail AS SOD
 	JOIN Production.Product AS P
 	ON SOD.ProductID = P.ProductID
 GROUP BY P.Name
-ORDER BY MAX(SOD.UnitPrice) * 100.0 / MIN(SOD.UnitPrice) DESC
+ORDER BY (MAX(SOD.UnitPrice) - MIN(SOD.UnitPrice)) * 100.0 / MIN(SOD.UnitPrice) DESC
 --
 
 -- zad. 13
@@ -215,7 +226,9 @@ FROM Production.Product AS P
 WHERE POH.OrderDate <= SOH.OrderDate
 GROUP BY P.Name
 ORDER BY P.Name
-
+-- musiałem wyfiltrować wszystkie gdzie data sprzedarzy była przed datą zakupu
+-- bo inaczej różnica wychodzi ujemna
+-- nie wiem dlaczego tak jest, może produkt już wcześniej był w magazynie i mogliśmy go sprzedać przed domówieniem kolejnego
 
 -- zad. 14
 SELECT
