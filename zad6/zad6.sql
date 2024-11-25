@@ -17,7 +17,7 @@ FROM Sales.SalesOrderHeader AS SOH
 WHERE YEAR(SOH.OrderDate) >= YEAR(GETDATE()) - 1
 GROUP BY P.FirstName, P.LastName
 ORDER BY COUNT(*) DESC
--- pusty wynik bo najnowsza data w tabeli to 2014 rok
+-- pusty wynik, bo najnowsza data w tabeli to 2014 rok
 -- https://dataedo.com/samples/html/AdventureWorks/doc/AdventureWorks_2/modules/Business_Entities_82/module.html
 
 -- zad. 2
@@ -63,7 +63,7 @@ FROM Sales.SalesPerson AS SP
 	ON SP.BusinessEntityID = SOH.SalesPersonID
 WHERE YEAR(SOH.OrderDate) >= 2022
 GROUP BY P.FirstName, P.LastName
--- wynik pusty ponieważ najnowsza data w tableli to 2014 rok
+-- wynik pusty, ponieważ najnowsza data w tabeli to 2014 rok
 
 -- zad. 5
 SELECT 
@@ -93,7 +93,7 @@ FROM Production.Product as P
 	ON SOD.SalesOrderID = SOH.SalesOrderID
 GROUP BY P.Name
 -- albo nikt nie zwraca 
--- albo flaga "czy zamównienie jest zwrócone" jest przechowywana w innym miejscu
+-- albo flaga "czy zamówienie jest zwrócone" jest przechowywana w innym miejscu
 -- ¯\_(:P)_/¯
 
 -- zad. 7 na dwa sposoby 
@@ -116,7 +116,7 @@ FROM Production.Product as P
 	ON SOD.SalesOrderID = SOH.SalesOrderID
 GROUP BY P.Name, P.ProductID, YEAR(SOH.OrderDate)
 ORDER BY P.Name, YEAR(SOH.OrderDate) DESC
--- najpierw zrobiłem tym spodobem a potem się nauczyłem tej klauzuli WITH więc zostawiłem 2 rozwiązania
+-- najpierw zrobiłem tym sposobem, a potem się nauczyłem tej klauzuli WITH więc zostawiłem 2 rozwiązania
 -- oba są poprawne
 
 --
@@ -213,7 +213,7 @@ ORDER BY (MAX(SOD.UnitPrice) - MIN(SOD.UnitPrice)) * 100.0 / MIN(SOD.UnitPrice) 
 -- zad. 13
 SELECT
 	P.Name,
-	AVG(DATEDIFF(day, POH.OrderDate, SOH.OrderDate)) AS 'Srednia ilosc dni od zakupu od dowstawcy do sprzedazy klientowi'
+	AVG(DATEDIFF(day, POH.OrderDate, SOH.OrderDate)) AS 'Średnia ilość dni od zakupu od dostawcy do sprzedaży klientowi'
 FROM Production.Product AS P
 	JOIN Purchasing.PurchaseOrderDetail AS POD
 	ON P.ProductID = POD.ProductID
@@ -226,9 +226,9 @@ FROM Production.Product AS P
 WHERE POH.OrderDate <= SOH.OrderDate
 GROUP BY P.Name
 ORDER BY P.Name
--- musiałem wyfiltrować wszystkie gdzie data sprzedarzy była przed datą zakupu
+-- musiałem wyfiltrować wszystkie gdzie data sprzedaży była przed datą zakupu
 -- bo inaczej różnica wychodzi ujemna
--- nie wiem dlaczego tak jest, może produkt już wcześniej był w magazynie i mogliśmy go sprzedać przed domówieniem kolejnego
+-- nie wiem, dlaczego tak jest, może produkt już wcześniej był w magazynie i mogliśmy go sprzedać przed domówieniem kolejnego
 
 -- zad. 14
 SELECT
