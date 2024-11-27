@@ -14,10 +14,9 @@ FROM Sales.SalesOrderHeader AS SOH
 	ON SOH.CustomerID = C.CustomerID
 	JOIN Person.Person AS P
 	ON C.PersonID = P.BusinessEntityID
-WHERE YEAR(SOH.OrderDate) >= YEAR(GETDATE()) - 1
+WHERE YEAR(SOH.OrderDate) >= 2014
 GROUP BY P.FirstName, P.LastName
 ORDER BY COUNT(*) DESC
--- pusty wynik, bo najnowsza data w tabeli to 2014 rok
 -- https://dataedo.com/samples/html/AdventureWorks/doc/AdventureWorks_2/modules/Business_Entities_82/module.html
 
 -- zad. 2
@@ -55,15 +54,15 @@ SELECT
 	P.FirstName,
 	P.LastName,
 	--YEAR(SOH.OrderDate)
-	AVG(SOH.TotalDue)
+	AVG(SOH.TotalDue) AS 'Średnia sprzedaż'
 FROM Sales.SalesPerson AS SP
 	JOIN Person.Person AS P
 	ON SP.BusinessEntityID = P.BusinessEntityID
 	JOIN Sales.SalesOrderHeader AS SOH
 	ON SP.BusinessEntityID = SOH.SalesPersonID
-WHERE YEAR(SOH.OrderDate) >= 2022
+WHERE YEAR(SOH.OrderDate) >= 2014
 GROUP BY P.FirstName, P.LastName
--- wynik pusty, ponieważ najnowsza data w tabeli to 2014 rok
+--
 
 -- zad. 5
 SELECT 
