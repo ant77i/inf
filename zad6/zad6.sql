@@ -3,7 +3,7 @@
 -- !!!
 
 
--- zad. 1
+-- zad. 1   
 SELECT
 	P.FirstName,
 	P.LastName,
@@ -212,7 +212,7 @@ ORDER BY (MAX(SOD.UnitPrice) - MIN(SOD.UnitPrice)) * 100.0 / MIN(SOD.UnitPrice) 
 -- zad. 13
 SELECT
 	P.Name,
-	AVG(DATEDIFF(day, POH.OrderDate, SOH.OrderDate)) AS 'Średnia ilość dni od zakupu od dostawcy do sprzedaży klientowi'
+	ABS(AVG(DATEDIFF(day, POH.OrderDate, SOH.OrderDate))) AS 'Średnia ilość dni od zakupu od dostawcy do sprzedaży klientowi'
 FROM Production.Product AS P
 	JOIN Purchasing.PurchaseOrderDetail AS POD
 	ON P.ProductID = POD.ProductID
@@ -222,12 +222,9 @@ FROM Production.Product AS P
 	ON P.ProductID = SOD.ProductID
 	JOIN Sales.SalesOrderHeader AS SOH
 	ON SOD.SalesOrderID = SOH.SalesOrderID
-WHERE POH.OrderDate <= SOH.OrderDate
 GROUP BY P.Name
 ORDER BY P.Name
--- musiałem wyfiltrować wszystkie gdzie data sprzedaży była przed datą zakupu
--- bo inaczej różnica wychodzi ujemna
--- nie wiem, dlaczego tak jest, może produkt już wcześniej był w magazynie i mogliśmy go sprzedać przed domówieniem kolejnego
+--
 
 -- zad. 14
 SELECT
