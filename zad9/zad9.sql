@@ -58,6 +58,7 @@ GO
 --
 
 -- zad 5
+-- nie da sie usunac tej osoby z wszystich tablic
 CREATE PROCEDURE DeletePerson
 	@ID INT
 AS

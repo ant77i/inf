@@ -62,8 +62,9 @@ ROLLBACK;
 -- w treści zadania błąd
 -- ProductCategoryID = 3 nie odpowiada 'Components', ID = 2 to 'Components'
 
+
 -- zad 10
-BEGIN TRANSACTION;
-DELETE FROM Person.Person WHERE LastName LIKE 'Test%'
+BEGIN TRANSACTION
+DELETE FROM Person.Person WHERE LastName LIKE 'Test&'
 ROLLBACK;
 --
