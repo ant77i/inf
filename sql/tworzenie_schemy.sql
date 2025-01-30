@@ -73,5 +73,6 @@ END;
 INSERT INTO Sales.Customer
 	(PersonID, StoreID, TerritoryID, ModifiedDate)
 VALUES (NULL, NULL, 5, GETDATE());
+GO
 
-SELECT * FROM Audit.CustemerChanges
+SELECT * FROM Audit.CustomerChanges
