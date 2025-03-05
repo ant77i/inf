@@ -1,0 +1,22 @@
+CREATE SCHEMA Humans
+AUTHORIZATION dbo
+	CREATE TABLE HR.Employees (
+		EmployeeID INT IDENTITY (1, 1) PRIMARY KEY,
+		FirstName NVARCHAR(50) NOT NULL,
+		LastName NVARCHAR(50) NOT NULL,
+		Email NVARCHAR(100) UNIQUE NOT NULL,
+		HireDate DATE DEFAULT GETDATE()
+	)
+
+	CREATE VIEW HR.v_ActiveEmployees AS
+		SELECT EmployeeID, FirstName, LastName, Email FROM HR.Employees
+GO
+
+CREATE VIEW HR.v_AllEmployees AS
+	SELECT * FROM HR.Employees
+GO
+
+CREATE LOGIN AuditUser WITH PASSWORD = 'SecurePassword!@#1'
+USE VLO2025
+CREATE USER AuditUser FOR LOGIN AuditUser
+GRANT SELECT ON SCHEMA::HR TO AuditUser
