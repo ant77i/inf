@@ -142,7 +142,7 @@ CREATE VIEW HR.v_Products AS
 GO
 --
 
--- 3
+-- 3a
 CREATE PROCEDURE HR.addRecord
 	@CustomerID INT,
 	@FirstName NVARCHAR(100),
@@ -151,5 +151,78 @@ CREATE PROCEDURE HR.addRecord
 	@Phone NVARCHAR(50)
 	AS
 	BEGIN
-		INSERT INTO HR.Customers VALUES (Custom
-	
+		INSERT INTO HR.Customers (CustomerID, FirstName, LastName, Email, Phone)
+		VALUES (@CustomerID, @FirstName, @LastName, @Email, @Phone)
+	END
+GO
+-- 3b
+CREATE PROCEDURE HR.editRecord
+	@CustomerID INT,
+	@FirstName NVARCHAR(100),
+	@LastName NVARCHAR(100),
+	@Email NVARCHAR(255),
+	@Phone NVARCHAR(50)
+	AS
+	BEGIN
+		UPDATE HR.Customers
+		SET
+			FirstName = @FirstName,
+			LastName = @LastName,
+			Email = @Email,
+			Phone = @Phone
+		WHERE CustomerID = @CustomerID
+	END
+GO
+--
+
+-- 4
+CREATE TRIGGER trg_CustomerAudit
+	ON HR.Customers AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+	SET NOCOUNT ON
+
+	INSERT INTO HR.AuditLogs (LogID, OperationType, TableName, NewValue, ChangedBy, ChangeDate)
+		SELECT 
+			(SELECT MAX(LogID) FROM HR.AuditLogs)+1,
+			'INSERT',
+			'HR.Customers',
+			CONCAT('ID: ', i.CustomerID, ', New Values: ', i.FirstName, ' ', i.LastName, ' ', i.Email, ' ', i.Phone),
+			SUSER_NAME(),
+			GETDATE()
+		FROM inserted i;
+
+	INSERT INTO HR.AuditLogs (LogID, OperationType, TableName, OldValue, NewValue, ChangedBy, ChangeDate)
+		SELECT
+			(SELECT MAX(LogID) FROM HR.AuditLogs)+1,
+			'UPDATE',
+			'HR.Customers',
+			CONCAT('ID: ', d.CustomerID, ', Old Values: ', d.FirstName, ' ', d.LastName, ' ', d.Email, ' ', d.Phone),
+			CONCAT('ID: ', i.CustomerID, ', New Values: ', i.FirstName, ' ', i.LastName, ' ', i.Email, ' ', i.Phone),
+			SUSER_NAME(),
+			GETDATE()
+		FROM deleted d
+		JOIN inserted i ON d.CustomerID = i.CustomerID
+
+	INSERT INTO HR.AuditLogs (LogID, OperationType, TableName, OldValue, ChangedBy, ChangeDate)
+		SELECT
+			(SELECT MAX(LogID) FROM HR.AuditLogs)+1,
+			'DELETE',
+			'HR.Customers',
+			CONCAT('ID: ', d.CustomerID, ', Old Values: ', d.FirstName, ' ', d.LastName, ' ', d.Email, ' ', d.Phone),
+			SUSER_NAME(),
+			GETDATE()
+		FROM deleted d
+END;
+GO
+
+SELECT * FROM HR.AuditLogs
+
+INSERT INTO HR.Customers (CustomerID, FirstName, LastName, Email, Phone)
+VALUES ((SELECT MAX(CustomerID) FROM HR.Customers)+1,'Leo', 'Bor', 'leo@gmail.com', '333666999')
+
+INSERT INTO HR.AuditLogs(LogID, OperationType, TableName, ChangedBy, ChangeDate)
+VALUES (0, 'INIT', 'HR.Customers', SUSER_NAME(), GETDATE())
+
+
+DELETE FROM HR.Customers WHERE CustomerID = 1
