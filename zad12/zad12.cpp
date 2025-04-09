@@ -6,7 +6,7 @@
 #include <map>
 #include <cmath>
 
-
+using namespace std;
 
 /*
 
@@ -18,17 +18,17 @@ enum class TokenType { NUMBER, OPERATOR, LEFT_PAREN, RIGHT_PAREN };
 
 struct Token {
     TokenType type;
-    std::string value;
+    string value;
 };
 
 class InfixToPostfixConverter {
 public:
-    std::vector<Token> convert(const std::vector<Token>& tokens) {
-        std::vector<Token> output;
-        std::stack<Token> operators;
+    vector<Token> convert(const vector<Token>& tokens) {
+        vector<Token> output;
+        stack<Token> operators;
 
-        std::map<std::string, int> precedence = {{"+", 1}, {"-", 1}, {"*", 2}, {"/", 2}, {"^", 3}};
-        std::map<std::string, bool> rightAssociative = {{"^", true}};
+        map<string, int> precedence = {{"+", 1}, {"-", 1}, {"*", 2}, {"/", 2}, {"^", 3}};
+        map<string, bool> rightAssociative = {{"^", true}};
 
         for (const auto& token : tokens) {
             if (token.type == TokenType::NUMBER) {
@@ -73,26 +73,11 @@ public:
 
 class ExpressionConverterApp {
 public:
-    void run() {
-        std::string expression;
-        while (true) {
-            std::cout << "Enter an infix expression (or type 'exit' to quit): ";
-            std::getline(std::cin, expression);
-            if (expression == "exit") break;
-            std::vector<Token> tokens = tokenize(expression);
-            InfixToPostfixConverter converter;
-            std::vector<Token> postfix = converter.convert(tokens);
-            for (const auto& token : postfix) {
-                std::cout << token.value << " ";
-            }
-            std::cout << std::endl;
-        }
-    }
-
-    std::vector<Token> tokenize(const std::string& expr) {
-        std::vector<Token> tokens;
-        std::istringstream iss(expr);
-        std::string item;
+    
+    vector<Token> tokenize(const string& expr) {
+        vector<Token> tokens;
+        istringstream iss(expr);
+        string item;
         while (iss >> item) {
             if (isdigit(item[0])) {
                 tokens.push_back({TokenType::NUMBER, item});
@@ -117,21 +102,21 @@ public:
 class ONPElement {
 public:
     virtual ~ONPElement() = default;
-    virtual std::string toString() const = 0;
+    virtual string toString() const = 0;
 };
 
 class NumberElement : public ONPElement {
     double value;
 public:
     NumberElement(double val) : value(val) {}
-    std::string toString() const override { return std::to_string(value); }
+    string toString() const override { return to_string(value); }
 };
 
 class OperatorElement : public ONPElement {
     char op;
 public:
     OperatorElement(char oper) : op(oper) {}
-    std::string toString() const override { return std::string(1, op); }
+    string toString() const override { return string(1, op); }
 };
 
 /*
@@ -142,11 +127,11 @@ public:
 
 class ONPEvaluator {
 public:
-    double evaluate(const std::vector<Token>& postfix) {
-        std::stack<double> stack;
+    double evaluate(const vector<Token>& postfix) {
+        stack<double> stack;
         for (const auto& token : postfix) {
             if (token.type == TokenType::NUMBER) {
-                stack.push(std::stod(token.value));
+                stack.push(stod(token.value));
             } else if (token.type == TokenType::OPERATOR) {
                 double b = stack.top(); stack.pop();
                 double a = stack.top(); stack.pop();
@@ -154,7 +139,7 @@ public:
                 else if (token.value == "-") stack.push(a - b);
                 else if (token.value == "*") stack.push(a * b);
                 else if (token.value == "/") {
-                    if (b == 0) throw std::runtime_error("Division by zero");
+                    if (b == 0) throw runtime_error("Division by zero");
                     stack.push(a / b);
                 }
                 else if (token.value == "^") stack.push(pow(a, b));
@@ -167,24 +152,22 @@ public:
 class ONPApplication {
 public:
     void run() {
-        std::string expression;
-        while (true) {
-            std::cout << "Enter an infix expression (or type 'exit' to quit): ";
-            std::getline(std::cin, expression);
-            if (expression == "exit") break;
-            std::vector<Token> tokens = ExpressionConverterApp().tokenize(expression);
-            InfixToPostfixConverter converter;
-            std::vector<Token> postfix = converter.convert(tokens);
-            ONPEvaluator evaluator;
-            try {
-                double result = evaluator.evaluate(postfix);
-                for (const auto& token : postfix) {
-                    std::cout << token.value << " ";
-                }
-                std::cout << "= " << result << std::endl;
-            } catch (const std::exception& e) {
-                std::cerr << "Error: " << e.what() << std::endl;
+        string expression;
+
+        cout << "Wpisz wyrażenie: ";
+        getline(cin, expression);
+        vector<Token> tokens = ExpressionConverterApp().tokenize(expression);
+        InfixToPostfixConverter converter;
+        vector<Token> postfix = converter.convert(tokens);
+        ONPEvaluator evaluator;
+        try {
+            double result = evaluator.evaluate(postfix);
+            for (const auto& token : postfix) {
+                cout << token.value << " ";
             }
+            cout << "\nRówna się: " << result << endl;
+        } catch (const exception& e) {
+            cerr << "Błąd: " << e.what() << endl;
         }
     }
 };
