@@ -15,7 +15,7 @@ struct wyniki {
 class algorytm {
 public:
     virtual ~algorytm() = default;
-    virtual wyniki sort(vector<double> v) = 0; // take copy to avoid mutating caller data
+    virtual wyniki sort(vector<double> v) = 0;
     virtual string nazwa() const = 0;
 };
 
@@ -50,8 +50,10 @@ public:
         auto start = chrono::steady_clock::now();
         for (int i = 1; i < n; ++i) {
             int j = i;
+
             por++;
             while (j > 0 && v[j - 1] > v[j]) {
+                por++;
                 zam++;
                 swap(v[j], v[j - 1]);
                 j--;
