@@ -1,124 +1,124 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
-#include <fstream>
 #include <algorithm>
-#include <tuple>
+#include <cstdlib>
+#include <ctime>
 using namespace std;
 
-tuple<int, int, double> selectionSort(vector<double>& v) {
-    int n = v.size();
+struct wyniki {
     int porownania = 0;
     int zamiany = 0;
-    chrono::time_point<chrono::steady_clock> start, end;
+    double czas = 0.0;
+};
 
-    start = chrono::steady_clock::now();
+class algorytm {
+public:
+    virtual ~algorytm() = default;
+    virtual wyniki sort(vector<double> v) = 0; // take copy to avoid mutating caller data
+    virtual string nazwa() const = 0;
+};
 
-    for (int i = 0; i < n - 1; ++i) {
-        int min_idx = i;
+class SelectionSort : public algorytm {
+public:
+    wyniki sort(vector<double> v) override {
+        int n = (int)v.size();
+        int por = 0;
+        int zam = 0;
+        auto start = chrono::steady_clock::now();
+        for (int i = 0; i < n - 1; ++i) {
+            int min_idx = i;
+            for (int j = i + 1; j < n; ++j) {
+                por++;
+                if (v[j] < v[min_idx]) min_idx = j;
+            }
+            zam++;
+            swap(v[i], v[min_idx]);
+        }
+        auto end = chrono::steady_clock::now();
+        return {por, zam, (double)chrono::duration_cast<chrono::microseconds>(end - start).count()};
+    }
+    string nazwa() const override { return "Selection Sort"; }
+};
 
-        for (int j = i + 1; j < n; ++j) {
-            porownania++;
-            if (v[j] < v[min_idx]) {
-                min_idx = j; 
+class InsertionSort : public algorytm {
+public:
+    wyniki sort(vector<double> v) override {
+        int n = (int)v.size();
+        int por = 0;
+        int zam = 0;
+        auto start = chrono::steady_clock::now();
+        for (int i = 1; i < n; ++i) {
+            int j = i;
+            por++;
+            while (j > 0 && v[j - 1] > v[j]) {
+                zam++;
+                swap(v[j], v[j - 1]);
+                j--;
             }
         }
-        
-        zamiany++;
-        swap(v[i], v[min_idx]);
+        auto end = chrono::steady_clock::now();
+        return {por, zam, (double)chrono::duration_cast<chrono::microseconds>(end - start).count()};
     }
+    string nazwa() const override { return "Insertion Sort"; }
+};
 
-    end = chrono::steady_clock::now();
-
-    return {porownania, zamiany, chrono::duration_cast<chrono::microseconds>(end - start).count()};
-}
-
-tuple<int, int, double> insertionSort(vector<double>& v) {
-	int n = v.size();
-    int porownania = 0;
-    int zamiany = 0;
-    chrono::time_point<chrono::steady_clock> start, end;
-
-	start = chrono::steady_clock::now();
-
-	for (int i = 1; i < n; i++) {
-		int j = i;
-
-        porownania++;
-		while (j > 0 && v[j - 1] > v[j]) {
-            zamiany++;
-			swap(v[j], v[j - 1]);
-            j--;
-		}
-	}
-    
-    end = chrono::steady_clock::now();
-
-    return {porownania, zamiany, chrono::duration_cast<chrono::microseconds>(end - start).count()};
-}
-
-tuple<int, int, double> bubbleSort(vector<double>& v) {
-	int n = v.size();
-    int porownania = 0;
-    int zamiany = 0;
-    chrono::time_point<chrono::steady_clock> start, end;
-
-	start = chrono::steady_clock::now();
-
-	for (int i = 0; i < n; i++) {
-		for (int j = i + 1; j < n; j++) {
-
-            porownania++;
-			if (v[i] > v[j]) {
-                swap(v[i], v[j]);
-                zamiany++;
-			}
-		}
-	}
-
-    end = chrono::steady_clock::now();
-
-    return {porownania, zamiany, chrono::duration_cast<chrono::microseconds>(end - start).count()};
-}
-
-
-
+class BubbleSort : public algorytm {
+public:
+    wyniki sort(vector<double> v) override {
+        int n = (int)v.size();
+        int por = 0;
+        int zam = 0;
+        auto start = chrono::steady_clock::now();
+        for (int i = 0; i < n; ++i) {
+            for (int j = i + 1; j < n; ++j) {
+                por++;
+                if (v[i] > v[j]) {
+                    swap(v[i], v[j]);
+                    zam++;
+                }
+            }
+        }
+        auto end = chrono::steady_clock::now();
+        return {por, zam, (double)chrono::duration_cast<chrono::microseconds>(end - start).count()};
+    }
+    string nazwa() const override { return "Bubble Sort"; }
+};
 
 int main() {
+    srand((unsigned)time(nullptr));
     int n = 0;
-
     cout << "Wpisz liczbe elementow: ";
-    cin >> n;
-    
-    vector<double> vec(n, 0);
-
-    for (int i = 0; i < n; i++) {
-        vec[i] = rand() % 999 + 1;
+    if (!(cin >> n) || n < 0) {
+        cout << "Niepoprawna liczba.\n";
+        return 1;
     }
 
-    vector<double> vecL = vec;
-    vector<double> vecS = vec;
-    sort(vecS.begin(), vecS.end());
+    vector<double> base(n);
+    for (int i = 0; i < n; ++i) base[i] = rand() % 999 + 1;
 
+    vector<double> vecL = base;
+    vector<double> vecS = base;
+    sort(vecS.begin(), vecS.end());
     vector<double> vecR = vecS;
     reverse(vecR.begin(), vecR.end());
 
-    int i = 0;
-    string labels[] = {"Losowych", "Posortowanych", "Odwrotnie posortowanych"};
-    for (vector<double> v : {vecL, vecS, vecR}) {
-        vector<double> vec1 = v;
-        vector<double> vec2 = v;
+    SelectionSort sel;
+    InsertionSort ins;
+    BubbleSort bub;
 
-        auto [porownaniaS, zamianyS, czasS] = selectionSort(v);
-        auto [porownaniaI, zamianyI, czasI] = insertionSort(vec1);   
-        auto [porownaniaB, zamianyB, czasB] = bubbleSort(vec2);
+    algorytm* algorithms[] = { &sel, &ins, &bub };
+    string nazwy[] = { "Losowych", "Posortowanych", "Odwrotnie posortowanych" };
+    vector<vector<double>> dane = { vecL, vecS, vecR };
 
-        cout << "Dla " << labels[i++] << " danych:\n";
-
-        cout << "Selection Sort - Porownania: " << porownaniaS << ", Zamiany: " << zamianyS << ", Czas: " << czasS << "us\n";
-        cout << "Insertion Sort - Porownania: " << porownaniaI << ", Zamiany: " << zamianyI << ", Czas: " << czasI << "us\n";
-        cout << "Bubble Sort - Porownania: " << porownaniaB << ", Zamiany: " << zamianyB << ", Czas: " << czasB << "us\n";
-
+    for (size_t i = 0; i < dane.size(); ++i) {
+        cout << "Dla " << nazwy[i] << " danych:\n";
+        for (algorytm* alg : algorithms) {
+            wyniki r = alg->sort(dane[i]);
+            cout << alg->nazwa() << " - Porownania: " << r.porownania
+                 << ", Zamiany: " << r.zamiany
+                 << ", Czas: " << r.czas << "us\n";
+        }
         cout << "\n----------------------------------------\n\n";
     }
 
